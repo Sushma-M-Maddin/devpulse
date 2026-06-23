@@ -88,5 +88,33 @@ const getSingleRepo = async(owner, repo)=>{
   };
 }
 
-module.exports = { getUser, getUserRepos, getLanguagesCount, getSingleRepo };
+const compareUsers = async (user1, user2)=>{
+  const [firstUser, secondUser] = await Promise.all([
+    getUser(user1),
+    getUser(user2)
+  ]);
+
+  return {
+          user1: firstUser,
+          user2: secondUser
+        };
+}
+
+const compareRepos = async (repo1, repo2)=>{
+
+  const [owner1, repoName1] = repo1.split('/');
+  const [owner2, repoName2] = repo2.split('/');
+
+  const [firstRepo, secondRepo] = await Promise.all([
+    getSingleRepo(owner1, repoName1),
+    getSingleRepo(owner2, repoName2)
+  ]);
+
+  return {
+    repo1: firstRepo,
+    repo2: secondRepo
+  };
+}
+
+module.exports = { getUser, getUserRepos, getLanguagesCount, getSingleRepo, compareUsers, compareRepos };
 

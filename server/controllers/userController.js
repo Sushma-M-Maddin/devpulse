@@ -53,11 +53,39 @@ const getSingleRepo = async(req, res)=>{
         res.json(single);
     }
     catch(error){
-        console.log(error.response?.status);
-        console.log(error.message);
         res.status(error.response?.status || 500).json({
             message : 'Failed to fetch the  the repo'
         });
     }
 }
-module.exports = { getUserProfile, getUserRepos, getLanguagesCount, getSingleRepo};
+
+const compareUsers = async(req,res)=>{
+    const {user1, user2} =req.query;
+
+    try{
+        const compUser = await githubService.compareUsers(user1,user2);
+        res.json(compUser);
+    }
+    catch(error){
+        res.status(error.response?.status || 500).json({
+            message : 'Failed to compare the users'
+        });
+
+    }
+}
+
+const compareRepos = async(req,res)=>{
+    const {repo1, repo2} = req.query;
+
+    try{
+        const compRepo = await githubService.compareRepos(repo1,repo2);
+        res.json(compRepo);
+    }
+    catch(error){
+        res.status(error.response?.status || 500).json({
+            message : 'Failed to compare the repos'
+        });
+    }
+
+}
+module.exports = { getUserProfile, getUserRepos, getLanguagesCount, getSingleRepo, compareUsers, compareRepos};
