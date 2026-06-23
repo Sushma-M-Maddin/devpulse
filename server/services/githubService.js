@@ -1,17 +1,15 @@
 const axios = require('axios');
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const githubAPI = axios.create({
+  baseURL: 'https://api.github.com',
+  headers: {
+    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+  },
+});
 
-//To get the user profile
 const getUser = async (username) => {
-  const response = await axios.get(`https://api.github.com/users/${username}`, {
-    headers: {
-      Authorization: `Bearer ${GITHUB_TOKEN}`,
-    },
-  });
-
+  const response = await githubAPI.get(`/users/${username}`);
   const data = response.data;
-
   return {
     username: data.login,
     name: data.name,
@@ -26,16 +24,9 @@ const getUser = async (username) => {
   };
 };
 
-//To get all the reops of user
-const getUserRepos = async(username)=>{
-  const response = await axios.get(`https://api.github.com/users/${username}/repos`,{
-    headers:{
-      Authorization:`Bearer ${GITHUB_TOKEN}`,
-    },
-  });
-   
-//When an arrow function returns an object directly (without a return keyword), you must wrap the {} in () — otherwise JavaScript thinks the {} is a function body, not an object. The () tells it "this is an object, not a block of code."
-return response.data.map(repo=>({
+const getUserRepos = async (username) => {
+  const response = await githubAPI.get(`/users/${username}/repos`);
+  return response.data.map(repo => ({
     name: repo.name,
     description: repo.description,
     stars: repo.stargazers_count,
@@ -43,38 +34,23 @@ return response.data.map(repo=>({
     language: repo.language,
     url: repo.html_url,
     updatedAt: repo.updated_at,
-}));
-
-}
-
-//To get the Language count used by user
-const getLanguagesCount = async(username)=>{
-const response = await axios.get(`https://api.github.com/users/${username}/repos`,{
-    headers:{
-      Authorization:`Bearer ${GITHUB_TOKEN}`,
-    },
-});
-
-const languages = {};
-
-response.data.forEach(repo=>{
-  if(repo.language){
-    languages[repo.language] = (languages[repo.language] || 0) + 1;
-  }
-})
-
-return languages;
+  }));
 };
 
-const getSingleRepo = async(owner, repo)=>{
-  const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}`,{
-    headers:{
-      Authorization: `Bearer ${GITHUB_TOKEN}`,
-    },
+const getLanguagesCount = async (username) => {
+  const response = await githubAPI.get(`/users/${username}/repos`);
+  const languages = {};
+  response.data.forEach(repo => {
+    if (repo.language) {
+      languages[repo.language] = (languages[repo.language] || 0) + 1;
+    }
   });
+  return languages;
+};
 
+const getSingleRepo = async (owner, repo) => {
+  const response = await githubAPI.get(`/repos/${owner}/${repo}`);
   const data = response.data;
-
   return {
     name: data.name,
     description: data.description,
@@ -86,35 +62,24 @@ const getSingleRepo = async(owner, repo)=>{
     watchers: data.watchers_count,
     updatedAt: data.updated_at,
   };
-}
+};
 
-const compareUsers = async (user1, user2)=>{
+const compareUsers = async (user1, user2) => {
   const [firstUser, secondUser] = await Promise.all([
     getUser(user1),
     getUser(user2)
   ]);
+  return { user1: firstUser, user2: secondUser };
+};
 
-  return {
-          user1: firstUser,
-          user2: secondUser
-        };
-}
-
-const compareRepos = async (repo1, repo2)=>{
-
+const compareRepos = async (repo1, repo2) => {
   const [owner1, repoName1] = repo1.split('/');
   const [owner2, repoName2] = repo2.split('/');
-
   const [firstRepo, secondRepo] = await Promise.all([
     getSingleRepo(owner1, repoName1),
     getSingleRepo(owner2, repoName2)
   ]);
-
-  return {
-    repo1: firstRepo,
-    repo2: secondRepo
-  };
-}
+  return { repo1: firstRepo, repo2: secondRepo };
+};
 
 module.exports = { getUser, getUserRepos, getLanguagesCount, getSingleRepo, compareUsers, compareRepos };
-
