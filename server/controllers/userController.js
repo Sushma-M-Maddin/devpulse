@@ -21,8 +21,6 @@ const getUserRepos = async (req, res)=>{
         res.json(repos);
     }
     catch(error){
-        console.log(error.response?.status);
-        console.log(error.message);
         res.status(error.response?.status || 500).json({
             message: 'Failed to fetch the repos from the github',
         });
@@ -37,8 +35,6 @@ const getLanguagesCount = async (req, res)=>{
         res.json(languages);
     }
     catch(error){
-        console.log(error.response?.status);
-        console.log(error.message);
         res.status(error.response?.status || 500).json({
             message : 'Failed to fetch the languages from the repo'
         });
@@ -89,3 +85,4 @@ const compareRepos = async(req,res)=>{
 
 }
 module.exports = { getUserProfile, getUserRepos, getLanguagesCount, getSingleRepo, compareUsers, compareRepos};
+
